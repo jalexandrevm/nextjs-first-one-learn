@@ -1,0 +1,5 @@
+[mongodb]
+clustername=
+username=jalexandrevm_db_user
+password=bHvH5qGkADP05Xqw
+connection=mongodb+srv://jalexandrevm_db_user:bHvH5qGkADP05Xqw@clusternextjslearnevent.dty59ot.mongodb.net/?appName=ClusterNextjsLearnEvents
