@@ -1,4 +1,4 @@
-import { Schema, model, models, Document } from 'mongoose';
+import {Schema, model, models, Document} from 'mongoose';
 
 /**
  * TypeScript interface for Event document
@@ -29,6 +29,7 @@ const EventSchema = new Schema<IEvent>(
       type: String,
       required: [true, 'Title is required'],
       trim: true,
+      maxLength: [100, 'Title cannot exceed 100 characters'],
     },
     slug: {
       type: String,
@@ -40,15 +41,17 @@ const EventSchema = new Schema<IEvent>(
       type: String,
       required: [true, 'Description is required'],
       trim: true,
+      maxLength: [1000, 'Description cannot exceed 1000 characters'],
     },
     overview: {
       type: String,
       required: [true, 'Overview is required'],
       trim: true,
+      maxLength: [500, 'Overview cannot exceed 500 characters'],
     },
     image: {
       type: String,
-      required: [true, 'Image is required'],
+      required: [true, 'Image URL is required'],
       trim: true,
     },
     venue: {
@@ -74,7 +77,10 @@ const EventSchema = new Schema<IEvent>(
     mode: {
       type: String,
       required: [true, 'Mode is required'],
-      trim: true,
+      enum: {
+        values: ['online', 'offline', 'hybrid'],
+        message: 'Mode must be either online, offline, or hybrid or offline',
+      },
     },
     audience: {
       type: String,
@@ -109,65 +115,90 @@ const EventSchema = new Schema<IEvent>(
 );
 
 /**
+ * Function to generate slug from title
+ * - Generates URL-friendly slug from title (only if title changed)
+ */
+function generateSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+    .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+}
+
+/**
+ * Function to normalize date to ISO format
+ */
+function normalizeDate(dateString: string): string {
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) {
+    throw new Error('Invalid date format');
+  }
+  return date.toISOString().split('T')[0]; // Return YYYY-MM-DD
+}
+
+/**
+ * Function to normalize time to ISO format
+ */
+function normalizeTime(timeString: string): string {
+  // Handling various time formats
+  const timeRegex = /^(\d{1,2}):(\d{2})(\s*(AM|PM))?$/i;
+  const match = timeString.trim().match(timeRegex);
+
+  if (!match) {
+    throw new Error('Invalid date format. Use HH:MM or HH:MM AM/PM');
+  }
+
+  let hours = parseInt(match[1]);
+  const minutes = (match[2]);
+  const period = match[4]?.toUpperCase();
+
+  if (period) {
+    // Convert 12-hour to 24-hour format
+    if (period === 'PM' && hours !== 12) hours += 12;
+    if (period === 'AM' && hours === 12) hours = 0;
+  }
+
+  if (hours < 0 || hours > 23 || parseInt(minutes) < 0 || parseInt(minutes) > 59) {
+    throw new Error('Invalid date format. Use HH:MM or HH:MM');
+  }
+  return `${hours.toString().padStart(2, '0')}:${minutes}`;
+}
+
+/**
  * Pre-save hook to generate slug and normalize date/time
  * - Generates URL-friendly slug from title (only if title changed)
  * - Normalizes date to ISO format (YYYY-MM-DD)
  * - Normalizes time to HH:MM format
  */
 EventSchema.pre('save', function (next) {
+  const event = this as IEvent;
+
   // Generate slug only if title is modified or document is new
-  if (this.isModified('title')) {
-    this.slug = this.title
-      .toLowerCase()
-      .trim()
-      .replace(/[^\w\s-]/g, '') // Remove special characters
-      .replace(/\s+/g, '-') // Replace spaces with hyphens
-      .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
-      .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+  if (event.isModified('title') || event.isNew) {
+    event.slug = generateSlug(event.title);
   }
 
   // Normalize date to ISO format (YYYY-MM-DD)
-  if (this.isModified('date')) {
-    try {
-      const dateObj = new Date(this.date);
-      if (isNaN(dateObj.getTime())) {
-        return next(new Error('Invalid date format'));
-      }
-      this.date = dateObj.toISOString().split('T')[0];
-    } catch (error) {
-      return next(new Error('Invalid date format'));
-    }
+  if (event.isModified('date')) {
+    event.date = normalizeDate(event.date);
   }
 
   // Normalize time to HH:MM format
-  if (this.isModified('time')) {
-    const timeRegex = /^([01]?[0-9]|2[0-3]):([0-5][0-9])$/;
-    if (!timeRegex.test(this.time)) {
-      // Try to parse and format time
-      try {
-        const timeParts = this.time.match(/(\d{1,2}):(\d{2})/);
-        if (timeParts) {
-          const hours = parseInt(timeParts[1], 10);
-          const minutes = parseInt(timeParts[2], 10);
-          if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
-            this.time = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-          } else {
-            return next(new Error('Invalid time format. Use HH:MM format'));
-          }
-        } else {
-          return next(new Error('Invalid time format. Use HH:MM format'));
-        }
-      } catch (error) {
-        return next(new Error('Invalid time format. Use HH:MM format'));
-      }
-    }
+  if (event.isModified('time')) {
+    event.time = normalizeTime(event.time);
   }
 
   next();
 });
 
 // Create unique index on slug for efficient lookups
-EventSchema.index({ slug: 1 }, { unique: true });
+EventSchema.index({slug: 1}, {unique: true});
+
+// Create compound index for common queries
+EventSchema.index({date: 1, mode: 1});
 
 /**
  * Use existing model if it exists (prevents recompilation in development)
