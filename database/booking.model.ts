@@ -81,6 +81,9 @@ BookingSchema.index({eventId: 1, createdAt: -1});
 // Create index on email for user booking lookups
 BookingSchema.index({email: 1});
 
+// Enforcing one booking per event per email
+BookingSchema.index({eventId: 1, email: 1}, {unique: true, name: 'uniq_event_email'});
+
 /**
  * Use existing model if it exists (prevents recompilation in development)
  * Otherwise, create a new model
