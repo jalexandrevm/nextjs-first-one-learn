@@ -42,8 +42,9 @@ export async function GET(
     if (!event) {
       return NextResponse.json(
         {message: `Event with slug '${sanitizedSlug}' not found`},
-        {status: 400}
+        {status: 404}
       );
+    }
     }
     // Return successful response with event data
     return NextResponse.json(
