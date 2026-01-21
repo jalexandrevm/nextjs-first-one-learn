@@ -5,7 +5,7 @@ import {IEvent} from "@/database";
 import {getSimilarEventsBySlug} from "@/lib/actions/event.actions";
 import EventCard from "@/components/EventCard";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? '';
 
 const EventDetailItem = ({icon, alt, label}: {
   icon: string,
@@ -43,12 +43,9 @@ const EventDetailsPage = async ({params}: {
 }) => {
   const {slug} = await params;
 
-  const request = await fetch(`${BASE_URL}/api/events/${slug}`);
-
   let event;
   try {
     const request = await fetch(`${BASE_URL}/api/events/${slug}`, {next: {revalidate: 60}});
-
     if (!request.ok) {
       if (request.status === 404) {
         return notFound();
