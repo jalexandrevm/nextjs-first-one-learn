@@ -22,13 +22,15 @@ export function cn(...inputs: ClassValue[]) {
  * @returns The resulting object constructed from the FormData, typed as `T`.
  */
 export function formDataToObject<T = Record<string, any>>(formData: FormData): T {
-  const object: Record<string, any> = {};
+  const object: Record<string, any> = Object.create(null);
+  const blockedKeys = new Set(['__proto__', 'prototype', 'constructor']);
 
   formData.forEach((value, key) => {
     // Identifica se a chave deve ser tratada como array (termina em [])
     const isArrayKey = key.endsWith('[]');
     const cleanKey = isArrayKey ? key.slice(0, -2) : key;
 
+    if (blockedKeys.has(cleanKey)) return;
     // Se a chave já existe no objeto
     if (Object.prototype.hasOwnProperty.call(object, cleanKey)) {
       // Garante que o valor atual seja transformado em um array se ainda não for
@@ -41,6 +43,10 @@ export function formDataToObject<T = Record<string, any>>(formData: FormData): T
       // Caso contrário, atribui o valor diretamente (string ou File)
       object[cleanKey] = isArrayKey ? [value] : value;
     }
+  });
+  
+  return object as T;
+}
   });
 
   return object as T;
