@@ -79,9 +79,11 @@ export async function GET() {
       {status: 200}
     );
   } catch (e) {
+    const message = e instanceof Error ? e.message : 'Unknown';
     return NextResponse.json(
-      {message: 'Event fetching failed', error: e},
+      {message: 'Event fetching failed', error: message},
       {status: 500}
+    );
     );
   }
 }
