@@ -1,13 +1,25 @@
 import {clsx, type ClassValue} from "clsx"
 import {twMerge} from "tailwind-merge"
 
+/**
+ * Combine multiple class name inputs into a single class string with Tailwind-aware merging.
+ *
+ * @param inputs - Class name values (strings, arrays, objects, etc.) to be combined
+ * @returns The final class string with duplicates and conflicting Tailwind classes resolved
+ */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
 /**
- * Converte FormData em um objeto tipado, tratando chaves terminadas em '[]'
- * como arrays.
+ * Convert a FormData into a typed object, treating keys that end with `[]` as arrays.
+ *
+ * Keys ending with `[]` have the suffix removed and their entries are collected into arrays.
+ * If a key appears multiple times without `[]`, its values are converted into an array and appended.
+ * Values are kept as provided by FormData (strings or File/Blob).
+ *
+ * @param formData - The FormData to convert.
+ * @returns The resulting object constructed from the FormData, typed as `T`.
  */
 export function formDataToObject<T = Record<string, any>>(formData: FormData): T {
   const object: Record<string, any> = {};

@@ -4,6 +4,16 @@ import {v2 as cloudinary} from "cloudinary";
 import Event from '@/database/event.model';
 import {formDataToObject} from "@/lib/utils";
 
+/**
+ * Handles POST requests that create a new event with an uploaded image.
+ *
+ * @param req - Incoming multipart/form-data request containing event fields and an `image` file
+ * @returns A `NextResponse`:
+ * - Status 201 with `{ message: 'Event created successfully', event }` on success
+ * - Status 400 with `{ message: 'Invalid JSON data format' }` if form data cannot be parsed
+ * - Status 400 with `{ message: 'Image file is required' }` if no image file is provided
+ * - Status 500 with `{ message: 'Event Creation Failed', error: string }` on server error
+ */
 export async function POST(req: NextRequest) {
   console.log('Estamos no POST');
   try {
@@ -55,6 +65,11 @@ export async function POST(req: NextRequest) {
   }
 }
 
+/**
+ * Fetches all events from the database sorted by creation date descending.
+ *
+ * @returns A NextResponse containing `{ message: string; events: Event[] }` with status 200 on success; on failure, a NextResponse containing `{ message: string; error: any }` with status 500.
+ */
 export async function GET() {
   try {
     await connectDB();
