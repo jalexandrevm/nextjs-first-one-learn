@@ -27,7 +27,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? '';
 
 const Home = async () => {
   'use cache';
-  cacheLife("hours");
+  cacheLife("minutes");
   const response = await fetch(`${BASE_URL}/api/events`);
   const {events = []} = response.ok ? await response.json() : {events: []};
   if (!response.ok) {

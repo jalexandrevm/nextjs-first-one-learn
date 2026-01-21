@@ -82,9 +82,9 @@ const EventDetailsPage = async ({params}: {
 
   const bookings = 10;
 
-  const similarEvents: IEvent[] = await getSimilarEventsBySlug(slug);
+  const similarEvents: IEvent[] = await getSimilarEventsBySlug(slug) as unknown as IEvent[];
 
-  console.log({similarEvents});
+  // console.log({similarEvents});
 
   return (
     <section id="event">

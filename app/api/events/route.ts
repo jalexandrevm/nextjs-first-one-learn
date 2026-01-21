@@ -84,6 +84,5 @@ export async function GET() {
       {message: 'Event fetching failed', error: message},
       {status: 500}
     );
-    );
   }
 }
