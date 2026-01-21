@@ -23,13 +23,16 @@ import {cacheLife} from "next/cache";
 //   },
 // ]
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? '';
 
 const Home = async () => {
   'use cache';
   cacheLife("hours");
   const response = await fetch(`${BASE_URL}/api/events`);
-  const {events} = await response.json();
+  const {events = []} = response.ok ? await response.json() : {events: []};
+  if (!response.ok) {
+    console.error('Failed to fetch events', response.status, response.statusText);
+  }
 
   return (
     <section>
