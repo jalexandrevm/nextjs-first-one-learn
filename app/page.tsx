@@ -50,7 +50,7 @@ const Home = async () => {
 
         <ul className="events">
           {events && events.length > 0 && events.map((event: IEvent) => (
-            <li key={event.title} className="list-none">
+            <li key={event.slug} className="list-none">
               <EventCard {...event} />
             </li>
           ))}
