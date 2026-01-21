@@ -31,7 +31,7 @@ export async function GET(
     if (!slug || typeof slug !== 'string' || slug.trim() === '') {
       return NextResponse.json(
         {message: 'Invalid or missing slug parameter'},
-        {status: 400}
+        {status: 404}
       );
     }
     // Sanitize slug (remove any potential malicious input)
@@ -44,7 +44,6 @@ export async function GET(
         {message: `Event with slug '${sanitizedSlug}' not found`},
         {status: 404}
       );
-    }
     }
     // Return successful response with event data
     return NextResponse.json(

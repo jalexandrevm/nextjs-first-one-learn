@@ -44,10 +44,6 @@ export function formDataToObject<T = Record<string, any>>(formData: FormData): T
       object[cleanKey] = isArrayKey ? [value] : value;
     }
   });
-  
-  return object as T;
-}
-  });
 
   return object as T;
 }
