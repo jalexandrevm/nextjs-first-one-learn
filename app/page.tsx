@@ -2,26 +2,6 @@ import ExploreBtn from "@/components/ExploreBtn";
 import EventCard from "@/components/EventCard";
 import {IEvent} from "@/database";
 import {cacheLife} from "next/cache";
-// import {events} from "@/lib/constants";
-
-// const events = [
-//   {
-//     image: '/images/event1.png',
-//     title: 'Event 1',
-//     slug: 'event-1',
-//     location: 'Location 1',
-//     date: 'Date-1',
-//     time: 'Time-1',
-//   },
-//   {
-//     image: '/images/event2.png',
-//     title: 'Event 2',
-//     slug: 'event-2',
-//     location: 'Location 2',
-//     date: 'Date-2',
-//     time: 'Time-2',
-//   },
-// ]
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? '';
 
